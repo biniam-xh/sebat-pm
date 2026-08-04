@@ -29,7 +29,7 @@ Establish docs pack (PRD, architecture, portable agents, backlog) so all contrib
 
 ### T-002 — Flutter app shell
 - **Phase:** 0
-- **Status:** in_progress
+- **Status:** in_review
 - **Depends on:** T-001
 - **PRD:** §9 Phase 0
 - **Architecture:** §3 Flutter feature folders
