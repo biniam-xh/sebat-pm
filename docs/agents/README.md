@@ -4,7 +4,7 @@ Portable agent settings for **Planner**, **Developer**, and **Tester**. Same fil
 
 ## Quick start (all tools)
 
-1. Pick a role: `planner`, `developer`, or `tester`.
+1. Pick a role: `orchestrator` (Level 2 one-chat loop), or `planner` / `developer` / `tester` (separate chats).
 2. Set **system / custom instructions** to the contents of `docs/agents/<role>/SYSTEM.md`.
 3. Attach or pin these knowledge files:
    - `docs/agents/shared-context.md`
@@ -13,8 +13,9 @@ Portable agent settings for **Planner**, **Developer**, and **Tester**. Same fil
    - `docs/product/PRD.md`
    - `docs/architecture/overview.md`
    - `docs/product/backlog.md`
+   - For Orchestrator: also pin Planner/Developer/Tester `SYSTEM.md` + `PLAYBOOK.md`
 4. Start with a role lock, for example:  
-   `You are the SebatPM Planner. Follow SYSTEM.md and shared-context.md.`
+   `You are the SebatPM Orchestrator. Follow SYSTEM.md. Run T-002.`
 
 ## File map
 
@@ -22,6 +23,8 @@ Portable agent settings for **Planner**, **Developer**, and **Tester**. Same fil
 |------|---------|
 | `shared-context.md` | Facts every role must share |
 | `workflow.md` | Hand-off protocol |
+| `orchestrator/SYSTEM.md` | Level 2 one-chat loop (Planner→Developer→Tester) |
+| `orchestrator/PLAYBOOK.md` | Orchestrator procedures |
 | `planner/SYSTEM.md` | Planner persona (paste as instructions) |
 | `planner/PLAYBOOK.md` | Planner procedures + templates |
 | `developer/SYSTEM.md` | Developer persona |

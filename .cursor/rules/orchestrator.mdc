@@ -1,0 +1,18 @@
+---
+description: SebatPM Orchestrator mode — use when user says Orchestrator, Run T-XXX, continue, or Level 2 loop
+alwaysApply: false
+---
+
+# Orchestrator shortcuts
+
+When the user says any of: `Orchestrator mode`, `Run T-XXX`, `continue`, `Planner only`, `Dev T-XXX`, `Test T-XXX`:
+
+1. Follow `docs/agents/orchestrator/SYSTEM.md` and `PLAYBOOK.md`.
+2. Also follow shared-context, workflow, and the role SYSTEM/PLAYBOOK files as needed.
+3. Announce `## Role: Planner|Developer|Tester` at every step.
+4. One ticket at a time. Do not mark `done` until Tester passes.
+5. On bare `Run T-XXX` → full loop. On `continue` → next ready `todo` in backlog.
+6. On `Planner only` / `Dev` / `Test` → that role only.
+7. On block (missing SDK, ambiguous AC) → stop and ask.
+
+Short command reference: `docs/agents/SHORTCUTS.md`.
