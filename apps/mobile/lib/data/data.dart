@@ -1,2 +1,5 @@
-/// Repositories, DTOs, and Firestore mappers (wired in later tickets).
+/// Repositories, DTOs, Firestore mappers, and integration contracts.
 library;
+
+export 'integration/integration.dart';
+export 'team/team_bootstrap.dart';

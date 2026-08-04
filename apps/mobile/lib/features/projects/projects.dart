@@ -1,2 +1,5 @@
-/// Projects / epics / tags / tasks / kanban feature skeleton (Phase 1).
+/// Projects feature library (Track P).
 library;
+
+export 'projects_home_screen.dart';
+export 'task_detail_stub_screen.dart';

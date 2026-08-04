@@ -1,2 +1,4 @@
-/// Chat channels feature skeleton (Phase 3).
+/// Chat feature library (Track C).
 library;
+
+export 'chat_home_screen.dart';

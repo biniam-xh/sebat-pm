@@ -9,22 +9,22 @@
 | Database | Cloud Firestore |
 | Files | Firebase Storage |
 | Push | Firebase Cloud Messaging (FCM) |
-| Backend jobs | Cloud Functions + Cloud Scheduler |
+| Backend jobs | Cloud Functions (+ Cloud Scheduler later) |
 
 ## 2. High-level flow
 
 ```
-Flutter app
+Flutter app (dual mode)
+  ├── App shell — Chat | Projects mode switch (Chat default)
   ├── Firebase Auth
-  ├── Firestore (realtime boards, chat, standup state)
+  ├── Firestore (realtime boards + chat)
   ├── Storage (attachments)
-  └── FCM (mentions, reminders, standup turn)
+  └── FCM (mentions, assignments, later automation)
 
 Cloud Functions
+  ├── onTeamBootstrap / seed — ensure #general + #standup exist
   ├── onMention / onAssignment → FCM
-  ├── scheduledStandup → StandupRun orchestration
-  ├── scheduledReminder → FCM + optional channel message
-  └── standupReply handler / timeout advance
+  └── (later) standup runs in #standup + reminders
 ```
 
 ## 3. Repository layout
@@ -36,6 +36,7 @@ SebatPM/
   docs/
     product/
     architecture/
+    design/mockups/
     agents/
   AGENTS.md
   .cursor/rules/         # Optional Cursor pointers only
@@ -45,66 +46,71 @@ SebatPM/
 
 ```
 apps/mobile/lib/
-  app/                   # bootstrap, router, theme
-  core/                  # shared widgets, theme, utils
+  app/                   # bootstrap, router, theme, shell + mode switch
+  core/                  # shared widgets, utils
   features/
-    auth/
-    workspace/
-    projects/            # projects, epics, tags, tasks, kanban
-    chat/
-    standup/             # client UI for standup channel
-    reminders/
+    auth/                # Track S
+    chat/                # Track C — never import features/projects widgets
+    projects/            # Track P — never import features/chat widgets
     notifications/
-  data/                  # repositories, DTOs, Firestore mappers
+    standup/             # later: client UI for #standup bot runs
+    # workspace/, reminders/ — multi-tenant / later
+  data/
+    integration/         # TaskRef, ChannelRef, board→channel contract
+    # repositories, DTOs, Firestore mappers
 ```
+
+**Parallel ownership:** Track C owns `features/chat/`; Track P owns `features/projects/`; Track S owns `app/` shell + auth; Track I owns `data/integration/` + deep-link routes. Cross-track UI only via router + contracts.
 
 ## 4. Firestore data model (sketch)
 
-Paths are workspace-scoped. IDs are Firebase Auth UIDs or auto-ids.
+MVP uses an **implicit shared team** (single tenant). Prefer top-level collections (simpler than nested `workspaces/{id}` until multi-tenant returns).
 
 ```
 users/{userId}
   displayName, email, photoUrl, fcmTokens[], createdAt
 
-workspaces/{workspaceId}
-  name, timezone, createdBy, createdAt
-  members/{userId}
-    role: owner | admin | member
-    joinedAt
-  invites/{inviteId}
-    email, role, status, createdBy, createdAt
-  projects/{projectId}
-    name, description, archived, createdAt, updatedAt
-    epics/{epicId}
-      title, description, color, createdAt
-    tags/{tagId}
-      name, color
-    tasks/{taskId}
-      title, descriptionMd, status, epicId?,
-      assigneeIds[], tagIds[], createdBy,
-      createdAt, updatedAt, archived
-      comments/{commentId}
-        bodyMd, authorId, attachmentIds[], mentionIds[], createdAt
-  channels/{channelId}
-    name, type: general | custom | standup,
-    createdBy, createdAt
-    messages/{messageId}
-      bodyMd, authorId, attachmentIds[], mentionIds[],
-      standupRunId?, createdAt
-  standupConfig
-    enabled, cadence: daily | weekly, timeLocal, timezone,
-    timeoutMinutes (default 15)
-  standupRuns/{runId}
-    status: running | completed | cancelled
-    participantIds[], currentIndex, startedAt, completedAt
-    answers/{userId}
-      text, taskIds[], respondedAt | skippedAt
-  reminders/{reminderId}
-    title, body, scheduleAt | cron, channelId?,
-    createdBy, status
-  attachments/{attachmentId}
-    storagePath, mimeType, sizeBytes, uploadedBy, createdAt
+team/default                 # singleton metadata (name, timezone, createdAt)
+  # optional members/{userId} later when roles return
+
+channels/{channelId}
+  name, type: general | custom | standup,
+  projectId?, createdBy, createdAt
+  messages/{messageId}
+    bodyMd, authorId, attachmentIds[], mentionIds[],
+    taskRef?: { taskId, title, status },
+    boardEvent?: { projectId, taskId, fromStatus?, toStatus? },
+    standupRunId?, createdAt
+
+standupConfig                     # team singleton (or team/default/standupConfig)
+  enabled, cadence: daily | weekly, timeLocal, timezone,
+  timeoutMinutes (default 15), channelId (defaults to #standup)
+
+standupRuns/{runId}
+  status: running | completed | cancelled
+  participantIds[], currentIndex, startedAt, completedAt
+  answers/{userId}
+    text, taskIds[], respondedAt | skippedAt
+
+projects/{projectId}
+  name, description, archived, channelId?,
+  createdAt, updatedAt
+  epics/{epicId}
+    title, description, color, createdAt
+  tags/{tagId}
+    name, color
+  tasks/{taskId}
+    title, descriptionMd, status, epicId?,
+    assigneeIds[], tagIds[], createdBy,
+    createdAt, updatedAt, archived
+    comments/{commentId}
+      bodyMd, authorId, attachmentIds[], mentionIds[], createdAt
+
+attachments/{attachmentId}
+  storagePath, mimeType, sizeBytes, uploadedBy, createdAt
 ```
+
+Seed: ensure channels with `type == general` (`#general`) and `type == standup` (`#standup`) exist (Cloud Function on deploy / first auth bootstrap). `#standup` is bot-owned; members read and reply during runs.
 
 ### Task status enum
 
@@ -113,67 +119,63 @@ workspaces/{workspaceId}
 ## 5. Storage layout
 
 ```
-workspaces/{workspaceId}/
-  tasks/{taskId}/{attachmentId}
-  comments/{commentId}/{attachmentId}
-  channels/{channelId}/{messageId}/{attachmentId}
+attachments/{attachmentId}/...
+# or scoped:
+projects/{projectId}/tasks/{taskId}/{attachmentId}
+channels/{channelId}/{messageId}/{attachmentId}
 ```
 
-Limits: max 10 MB per file; allow images and common docs (pdf, txt, md, docx, etc.). Validate in client and Cloud Function / Storage rules.
+Limits: max 10 MB per file; allow images and common docs. Validate in client and Storage rules.
 
 ## 6. Security rules (sketch)
 
-Principles:
+Principles (MVP shared team):
 
-- Authenticated only.
-- Membership required for all workspace reads/writes.
-- Role gates: invites, standupConfig, archive project → `admin` or `owner`.
-- Task/comment/message create: any member; update own content or assignee fields as defined.
-- `#standup` bot messages: written only by privileged Functions (Admin SDK); clients may post replies during their turn.
-- Attachment metadata must match membership; Storage rules mirror workspace membership.
+- Authenticated only for reads/writes.
+- Any authenticated user may read/write shared-team channels, projects, tasks (tighten when roles/workspaces return).
+- Attachment metadata must match authenticated uploader; size/MIME validated.
 
-Example patterns (illustrative, not final):
-
-```
-function isMember(workspaceId) {
-  return exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
-}
-
-function memberRole(workspaceId) {
-  return get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.role;
-}
-
-function isAdmin(workspaceId) {
-  return memberRole(workspaceId) in ['owner', 'admin'];
-}
-```
+When multi-workspace returns, restore membership helpers (`isMember`, `isAdmin`).
 
 ## 7. Cloud Functions
 
 | Function | Trigger | Behavior |
 |----------|---------|----------|
-| `onWorkspaceCreate` | Firestore create | Seed `#general`, `#standup`, default standupConfig |
+| `ensureSeedChannels` | Deploy / first run / Auth create | Seed `#general` and `#standup` if missing |
 | `onMention` | Task/comment/message write | Detect new mentionIds → FCM deep link |
 | `onTaskAssigned` | Task update | Notify new assignees |
-| `scheduledStandupTick` | Cloud Scheduler | For due workspaces, start StandupRun; post first prompt |
-| `onStandupMessage` | Channel message | If active run and author is current user, record answer, advance |
-| `standupTimeout` | Scheduled / delayed | Skip current user if no answer; advance |
-| `scheduledReminder` | Scheduler | Send FCM; optional channel post |
+| `onTaskStatusChanged` (opt) | Task status update | If project has `channelId` and posting enabled, write board-event message |
 
-### Standup algorithm
+Parked until later phase: standup *scheduler* + reminder schedulers (channel `#standup` is seeded earlier).
+
+### Standup in `#standup` (later phase)
 
 1. Load members with ≥1 task where `status == in_progress` in any non-archived project.
-2. If empty, post “No in-progress tasks today” and complete run.
+2. If empty, post “No in-progress tasks today” in `#standup` and complete run.
 3. Else create `standupRuns/{runId}` with ordered `participantIds`.
-4. Post prompt for `participantIds[currentIndex]` listing their in-progress tasks.
+4. Post prompt in `#standup` for `participantIds[currentIndex]` listing their in-progress tasks.
 5. On reply or timeout → write `answers/{userId}` → increment index → next prompt or summary.
 
 ## 8. Client concerns
 
-- Use Firestore realtime listeners for board and channel.
+### Shell / navigation
+
+- `AppMode.chat` | `AppMode.projects` segmented control on shell.
+- Cold start → Chat → prefer `#general`.
+- Routes: `/` shell, `/chat/:channelId`, `/pm/projects/:projectId`, `/pm/tasks/:taskId`.
+
+### Integration contracts (`lib/data/integration/`)
+
+- `TaskRef` — taskId, title, status  
+- `ChannelRef` — channelId, name  
+- `BoardChannelPoster` / `postBoardEventToChannel(...)` — PM calls; Chat owns message schema  
+- Chat never imports PM widgets; PM never imports Chat widgets  
+
+### Other
+
+- Firestore realtime listeners for board and channel.
 - Optimistic local updates for drag-and-drop status changes.
 - Markdown render for descriptions, comments, messages.
-- Mention picker inserts stable `@[displayName](userId)` or equivalent structured mention.
 - Deep links: `sebatpm://tasks/{id}`, `sebatpm://channels/{id}`.
 
 ## 9. Environments
@@ -186,4 +188,5 @@ function isAdmin(workspaceId) {
 
 - PRD: [../product/PRD.md](../product/PRD.md)
 - Backlog: [../product/backlog.md](../product/backlog.md)
+- Mockups: [../design/mockups/README.md](../design/mockups/README.md)
 - Agents: [../agents/README.md](../agents/README.md)
