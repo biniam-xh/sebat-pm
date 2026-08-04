@@ -1,0 +1,38 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+**/doc/api/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+apps/mobile/.dart_tool/
+apps/mobile/build/
+
+# Firebase / secrets
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
+**/serviceAccount*.json
+.env
+.env.*
+!.env.example
+
+# Node (Cloud Functions)
+functions/node_modules/
+functions/lib/
+functions/.runtimeconfig.json
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+!.cursor/rules/
+
+# Misc
+*.log
+coverage/

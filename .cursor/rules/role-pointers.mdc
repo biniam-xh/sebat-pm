@@ -1,0 +1,19 @@
+---
+description: Pointers to SebatPM Planner / Developer / Tester portable agent docs
+alwaysApply: false
+globs: docs/**/*
+---
+
+# SebatPM role pointers
+
+When the user asks you to act as a role, load the matching portable docs (source of truth — do not duplicate policy in this rule):
+
+| Role | Load |
+|------|------|
+| Planner | `docs/agents/planner/SYSTEM.md` + `docs/agents/planner/PLAYBOOK.md` |
+| Developer | `docs/agents/developer/SYSTEM.md` + `docs/agents/developer/PLAYBOOK.md` |
+| Tester | `docs/agents/tester/SYSTEM.md` + `docs/agents/tester/PLAYBOOK.md` |
+
+Also load: `docs/agents/shared-context.md`, `docs/agents/workflow.md`, `docs/product/backlog.md`.
+
+Setup for non-Cursor tools: `docs/agents/README.md`. Index: `AGENTS.md`.

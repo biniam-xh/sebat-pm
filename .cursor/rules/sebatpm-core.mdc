@@ -1,0 +1,14 @@
+---
+description: SebatPM shared product/stack constraints — always apply; read docs/agents/shared-context.md
+alwaysApply: true
+---
+
+# SebatPM core
+
+Before planning or coding, read and follow:
+
+- `docs/agents/shared-context.md`
+- `docs/product/PRD.md`
+- `docs/architecture/overview.md`
+
+Do not invent features outside the PRD. Label extras as `v2`. Stack is Flutter + Firebase. Agent policy lives in `docs/agents/` (tool-agnostic) — do not fork rules here.
