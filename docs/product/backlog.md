@@ -35,7 +35,7 @@ Establish docs pack (PRD, architecture, portable agents, backlog) so all contrib
 ### T-002 — Flutter app shell
 - **Phase:** 0
 - **Track:** S
-- **Status:** in_review
+- **Status:** done
 - **Depends on:** T-001
 - **PRD:** §9 Phase 0
 - **Architecture:** §3 Flutter feature folders
@@ -55,7 +55,7 @@ Create `apps/mobile` Flutter project with app bootstrap, routing stub, theme stu
 ### T-017 — Dual-mode shell (Chat | Projects)
 - **Phase:** 0
 - **Track:** S
-- **Status:** in_review
+- **Status:** done
 - **Depends on:** T-002
 - **PRD:** §5.2, Epic A
 - **Architecture:** §8 Client shell
