@@ -154,4 +154,5 @@ UI mockups: [docs/design/mockups/](../design/mockups/).
 - Architecture: [../architecture/overview.md](../architecture/overview.md)
 - Backlog: [backlog.md](backlog.md)
 - Design mockups: [../design/mockups/README.md](../design/mockups/README.md)
+- Firebase setup: [../setup/firebase-dev.md](../setup/firebase-dev.md)
 - Agents: [../agents/README.md](../agents/README.md)

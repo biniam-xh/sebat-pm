@@ -6,6 +6,7 @@ import 'package:sebatpm/app/app_mode.dart';
 import 'package:sebatpm/app/app_shell.dart';
 import 'package:sebatpm/data/integration/task_ref.dart';
 import 'package:sebatpm/data/team/team_bootstrap.dart';
+import 'package:sebatpm/firebase_options.dart';
 
 void main() {
   testWidgets('cold start shows Chat mode by default', (tester) async {
@@ -51,5 +52,10 @@ void main() {
     expect(result.teamId, TeamBootstrap.defaultTeamId);
     expect(result.generalChannelId, TeamBootstrap.generalChannelName);
     expect(result.standupChannelId, TeamBootstrap.standupChannelName);
+  });
+
+  test('Firebase options expose a projectId for bootstrap', () {
+    expect(DefaultFirebaseOptions.android.projectId, isNotEmpty);
+    expect(DefaultFirebaseOptions.android.apiKey, isNotEmpty);
   });
 }
