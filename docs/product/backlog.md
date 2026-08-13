@@ -96,7 +96,7 @@ Connect the Flutter app to a Firebase `dev` project (Auth, Firestore, Storage, F
 ### T-004 — Auth (Google Sign-In first)
 - **Phase:** 0
 - **Track:** S
-- **Status:** in_review
+- **Status:** done
 - **Depends on:** T-003
 - **PRD:** §5.1, §2
 - **Architecture:** §1 Auth
