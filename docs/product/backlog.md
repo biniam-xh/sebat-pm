@@ -35,7 +35,7 @@ Establish docs pack (PRD, architecture, portable agents, backlog) so all contrib
 ### T-002 — Flutter app shell
 - **Phase:** 0
 - **Track:** S
-- **Status:** in_review
+- **Status:** done
 - **Depends on:** T-001
 - **PRD:** §9 Phase 0
 - **Architecture:** §3 Flutter feature folders
@@ -55,7 +55,7 @@ Create `apps/mobile` Flutter project with app bootstrap, routing stub, theme stu
 ### T-017 — Dual-mode shell (Chat | Projects)
 - **Phase:** 0
 - **Track:** S
-- **Status:** in_review
+- **Status:** done
 - **Depends on:** T-002
 - **PRD:** §5.2, Epic A
 - **Architecture:** §8 Client shell
@@ -76,7 +76,7 @@ Replace single placeholder home with app shell: segmented **Chat | Projects** sw
 ### T-003 — Firebase project wiring
 - **Phase:** 0
 - **Track:** S
-- **Status:** todo
+- **Status:** done
 - **Depends on:** T-017
 - **PRD:** §2, §5.1
 - **Architecture:** §1, §9
@@ -93,24 +93,26 @@ Connect the Flutter app to a Firebase `dev` project (Auth, Firestore, Storage, F
 
 ---
 
-### T-004 — Auth (email, Google, Apple)
+### T-004 — Auth (Google Sign-In first)
 - **Phase:** 0
 - **Track:** S
-- **Status:** todo
+- **Status:** done
 - **Depends on:** T-003
 - **PRD:** §5.1, §2
 - **Architecture:** §1 Auth
 
 **Description**  
-Implement sign-up/sign-in with email/password, Google, and Apple (iOS), plus sign-out and basic session restore into the dual-mode shell.
+Implement Google Sign-In, sign-out, and basic session restore into the dual-mode shell. Create/update `users/{uid}` on sign-in.
 
 **Acceptance criteria**
-- Given a new email user, when they register and sign in, then they reach the authenticated dual-mode shell.
-- Given Google Sign-In (and Apple on iOS), when completed, then a Firebase session exists and `users/{uid}` profile doc is created/updated.
+- Given Google Sign-In, when completed, then a Firebase session exists and the user reaches the dual-mode shell.
+- Given Google Sign-In, when completed, then `users/{uid}` profile doc is created/updated.
 - Given a signed-in user, when they sign out, then protected screens are inaccessible.
+- Given an existing session, when the app restarts, then the dual-mode shell is restored without signing in again.
 
 **Out of scope**
-- Password reset polish beyond Firebase default; MFA
+- Email/password and Apple Sign-In (follow-up ticket)
+- Password reset; MFA
 
 ---
 

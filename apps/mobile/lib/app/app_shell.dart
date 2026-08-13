@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:sebatpm/app/app_mode.dart';
+import 'package:sebatpm/features/auth/auth_scope.dart';
 import 'package:sebatpm/features/chat/chat_home_screen.dart';
 import 'package:sebatpm/features/projects/projects_home_screen.dart';
 
@@ -26,11 +27,27 @@ class _AppShellState extends State<AppShell> {
     _mode = widget.initialMode;
   }
 
+  Future<void> _signOut() async {
+    final auth = AuthScope.maybeOf(context);
+    if (auth == null) {
+      return;
+    }
+    await auth.signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('SebatPM'),
+        actions: [
+          if (AuthScope.maybeOf(context) != null)
+            IconButton(
+              tooltip: 'Sign out',
+              onPressed: _signOut,
+              icon: const Icon(Icons.logout),
+            ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
           child: Padding(

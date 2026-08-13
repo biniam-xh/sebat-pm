@@ -1,17 +1,15 @@
-# sebatpm
+# SebatPM mobile
 
-A new Flutter project.
+Flutter client for SebatPM (Chat + Projects dual-mode).
 
-## Getting Started
+## Setup
 
-This project is a starting point for a Flutter application.
+1. `flutter pub get`
+2. Firebase `dev` config: follow [docs/setup/firebase-dev.md](../../docs/setup/firebase-dev.md)  
+   (creates gitignored `lib/firebase_options.dart`)
+3. Enable **Google** in Firebase Auth and add the Android **SHA-1** fingerprint (see setup doc)
+4. `flutter run` — cold start shows Google sign-in until a session exists
 
-A few resources to get you started if this is your first Flutter project:
+## Android SSL (this machine)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+If Gradle fails with PKIX / SSL errors, see [scripts/README-android-ssl.md](../../scripts/README-android-ssl.md).

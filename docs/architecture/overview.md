@@ -181,8 +181,8 @@ Parked until later phase: standup *scheduler* + reminder schedulers (channel `#s
 ## 9. Environments
 
 - `dev` and `prod` Firebase projects.
-- Flutter flavors or `--dart-define` for Firebase config.
-- Never commit service account keys; use CI secrets.
+- FlutterFire generates `lib/firebase_options.dart` (gitignored); see [docs/setup/firebase-dev.md](../setup/firebase-dev.md).
+- Never commit service account keys, `google-services.json`, or `GoogleService-Info.plist`; use CI secrets for prod.
 
 ## 10. Related docs
 
