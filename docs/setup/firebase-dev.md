@@ -33,11 +33,40 @@ $env:NODE_EXTRA_CA_CERTS = "$env:USERPROFILE\.gradle\ssl\avast-web-shield-root.p
 
 1. Open [Firebase Console](https://console.firebase.google.com/).
 2. Create project (this repo’s current id: **`sebatpm-dev-a8ff0`**).
-3. Enable (placeholders for now; Auth lands in T-004):
-   - Authentication (Email/Password at minimum when you reach T-004)
-   - Cloud Firestore
+3. Enable:
+   - **Authentication → Sign-in method → Google** (required for T-004)
+   - Cloud Firestore (create DB; use test mode for local MVP or rules that allow authenticated `users/{uid}` writes)
    - Storage
    - Cloud Messaging
+
+### Android Google Sign-In (SHA fingerprints)
+
+Google Sign-In on Android needs the app’s SHA-1 (and preferably SHA-256) on the Firebase Android app. Without them, `google-services.json` has an empty `oauth_client` list and sign-in fails.
+
+1. Print the **debug** keystore fingerprints:
+
+```powershell
+keytool -list -v -alias androiddebugkey `
+  -keystore "$env:USERPROFILE\.android\debug.keystore" `
+  -storepass android -keypass android
+```
+
+2. Firebase Console → Project settings → Your apps → Android (`com.sebatpm.sebatpm`) → **Add fingerprint**.
+3. Re-download `google-services.json` **or** re-run `flutterfire configure` so `oauth_client` is populated.
+4. Confirm Authentication → Google is **Enabled**.
+
+This machine’s current debug SHA-1 (for local emulator builds):
+
+`B5:23:1C:22:54:2E:E1:99:7C:BA:8D:20:43:3C:3A:7A:A6:DD:EA:D1`
+
+### Emulator Google Sign-In tips
+
+1. Use an AVD image with **Google Play** (not plain AOSP).
+2. **Update Google Play services** in the Play Store (outdated GMS shows Google’s “Couldn't sign in” screen). Log warning looks like: `Google Play services out of date … Requires X but found Y`.
+3. Add a **Google account**: Settings → Passwords & accounts → Add account → Google.
+4. Enable **Google** under Firebase Authentication → Sign-in method.
+
+The app passes the Firebase **Web** OAuth client id as `serverClientId` (`lib/firebase/google_sign_in_config.dart`). After regenerating Firebase config, update that constant from the type-3 `client_id` in `google-services.json`.
 
 ## 2. Register apps + generate options
 
