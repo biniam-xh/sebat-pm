@@ -2,6 +2,8 @@
 
 Goal: point `apps/mobile` at a Firebase **dev** project without committing secrets.
 
+**Joining as a new developer?** Start here: [firebase-onboarding.md](./firebase-onboarding.md) (shared project `sebatpm-dev-a8ff0`, no new project).
+
 Gitignored (never commit):
 
 - `apps/mobile/lib/firebase_options.dart`
