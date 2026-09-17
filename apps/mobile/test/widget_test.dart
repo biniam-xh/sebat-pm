@@ -1,3 +1,4 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -80,11 +81,20 @@ void main() {
     expect(TaskStatus.parse('in_review'), TaskStatus.inReview);
   });
 
-  test('TeamBootstrap returns shared default team', () async {
-    final result = await const TeamBootstrap().ensureReady();
+  test('TeamBootstrap seeds the Sebat default workspace and general channel', () async {
+    final firestore = FakeFirebaseFirestore();
+    final result = await TeamBootstrap(firestore: firestore).ensureReady();
     expect(result.teamId, TeamBootstrap.defaultTeamId);
+    expect(result.workspaceName, TeamBootstrap.defaultWorkspaceName);
     expect(result.generalChannelId, TeamBootstrap.generalChannelName);
     expect(result.standupChannelId, TeamBootstrap.standupChannelName);
+    expect(result.seeded, isTrue);
+
+    final workspace = await firestore.collection('workspaces').doc('default').get();
+    expect(workspace.data()?['name'], TeamBootstrap.defaultWorkspaceName);
+
+    final channel = await firestore.collection('channels').doc('general').get();
+    expect(channel.data()?['type'], 'general');
   });
 
   test('Firebase options expose a projectId for bootstrap', () {

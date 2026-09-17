@@ -64,17 +64,18 @@ apps/mobile/lib/
 
 ## 4. Firestore data model (sketch)
 
-MVP uses an **implicit shared team** (single tenant). Prefer top-level collections (simpler than nested `workspaces/{id}` until multi-tenant returns).
+MVP supports **multiple workspaces** in the model, but bootstraps a single default workspace named `Sebat` for the user. Prefer workspace-scoped collections so later switch-over is straightforward.
 
 ```
 users/{userId}
   displayName, email, photoUrl, fcmTokens[], createdAt
 
-team/default                 # singleton metadata (name, timezone, createdAt)
-  # optional members/{userId} later when roles return
+workspaces/{workspaceId}
+  name: 'Sebat', timezone, createdAt
+  members/{userId}             # later when roles return
 
 channels/{channelId}
-  name, type: general | custom | standup,
+  workspaceId, name, type: general | custom | standup,
   projectId?, createdBy, createdAt
   messages/{messageId}
     bodyMd, authorId, attachmentIds[], mentionIds[],
@@ -82,7 +83,7 @@ channels/{channelId}
     boardEvent?: { projectId, taskId, fromStatus?, toStatus? },
     standupRunId?, createdAt
 
-standupConfig                     # team singleton (or team/default/standupConfig)
+standupConfig                     # workspace-scoped config
   enabled, cadence: daily | weekly, timeLocal, timezone,
   timeoutMinutes (default 15), channelId (defaults to #standup)
 
@@ -110,7 +111,7 @@ attachments/{attachmentId}
   storagePath, mimeType, sizeBytes, uploadedBy, createdAt
 ```
 
-Seed: ensure channels with `type == general` (`#general`) and `type == standup` (`#standup`) exist (Cloud Function on deploy / first auth bootstrap). `#standup` is bot-owned; members read and reply during runs.
+Seed: ensure a default workspace named `Sebat` exists, then create a channel with `type == general` (`#general`) in that workspace. A later phase may add `#standup` as a bot-owned channel for the same workspace. The startup bootstrap should avoid creating duplicate default workspaces.
 
 ### Task status enum
 
@@ -161,8 +162,9 @@ Parked until later phase: standup *scheduler* + reminder schedulers (channel `#s
 ### Shell / navigation
 
 - `AppMode.chat` | `AppMode.projects` segmented control on shell.
-- Cold start → Chat → prefer `#general`.
-- Routes: `/` shell, `/chat/:channelId`, `/pm/projects/:projectId`, `/pm/tasks/:taskId`.
+- Cold start → Chat → prefer the default workspace’s `#general`.
+- Workspace switcher can be added later; the route model should be workspace-aware.
+- Routes: `/workspaces/:workspaceId/chat/:channelId`, `/workspaces/:workspaceId/pm/projects/:projectId`, `/workspaces/:workspaceId/pm/tasks/:taskId`.
 
 ### Integration contracts (`lib/data/integration/`)
 

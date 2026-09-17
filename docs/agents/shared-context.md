@@ -18,7 +18,7 @@ Load this file for **every** role (Planner, Developer, Tester) in Claude, ChatGP
 
 Use these names only (do not invent synonyms in tickets or code):
 
-- Team (implicit shared team — no Workspace create UI in MVP)
+- Workspace (multi-workspace-ready; bootstrap creates one default workspace named `Sebat` with a default `#general` channel)
 - Project, Epic, Task, Tag, Comment
 - Status: `backlog`, `ready`, `in_progress`, `in_review`, `done`
 - Channel types: `general`, `custom`, `standup` (bot-owned)
@@ -29,7 +29,7 @@ Use these names only (do not invent synonyms in tickets or code):
 
 | Track | Owns |
 |-------|------|
-| **S** | Shell, mode switch, Auth, Firebase, implicit team + `#general` / `#standup` seed |
+| **S** | Shell, mode switch, Auth, Firebase, default workspace + `#general` seed |
 | **C** | `features/chat/` |
 | **P** | `features/projects/` |
 | **I** | `data/integration/`, deep links, task chips, board→channel, project↔channel |
@@ -41,11 +41,11 @@ Chat must not import PM widgets; PM must not import Chat widgets — only contra
 
 1. Do **not** invent features outside [docs/product/PRD.md](../product/PRD.md).
 2. Anything beyond MVP is labeled **`v2`** and parked — never sneak into active phase tickets.
-3. Cold start opens **Chat**; `#general` and `#standup` exist by default (standup bot runs later).
+3. Cold start opens **Chat**; the default workspace `Sebat` exists and `#general` is present by default (standup bot runs later).
 4. Rich text = **markdown + mentions + attachments** (not a full block editor).
-5. Channels are public within the shared team (no DMs / private channels in MVP).
+5. Channels are public within the active workspace (no DMs / private channels in MVP).
 6. Status columns are fixed; no custom workflows.
-7. No create-workspace / invite UI until multi-tenant v2 returns.
+7. No create-workspace / invite UI in MVP; the bootstrap creates one default workspace and users can switch workspaces later.
 
 ## Source-of-truth docs
 
