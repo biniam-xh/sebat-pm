@@ -4,7 +4,7 @@ Living backlog. Planner owns status updates. Statuses: `todo` | `in_progress` | 
 
 **Tracks:** `S` shared shell/auth/team · `C` chat · `P` PM · `I` integration  
 
-Confirmed defaults: Flutter + Firebase; dual-mode Chat (default) + Projects; implicit shared team; `#general` + `#standup` auto-seeded; auth = email/password + Google + Apple (iOS).
+Confirmed defaults: Flutter + Firebase; dual-mode Chat (default) + Projects; multi-workspace-ready with one default seeded workspace named `Sebat` and a default `#general` channel; auth = email/password + Google + Apple (iOS).
 
 UI mockups: [docs/design/mockups/](../design/mockups/).
 
@@ -116,24 +116,24 @@ Implement Google Sign-In, sign-out, and basic session restore into the dual-mode
 
 ---
 
-### T-005 — Implicit team bootstrap + seed `#general` and `#standup`
+### T-005 — Default workspace bootstrap + seed `#general`
 - **Phase:** 0
 - **Track:** S
 - **Status:** todo
 - **Depends on:** T-004
 - **PRD:** §5.1, §5.4, Epic A
-- **Architecture:** §4 team/channels; §7 `ensureSeedChannels`
+- **Architecture:** §4 workspaces/channels; §7 `ensureDefaultWorkspace`
 
 **Description**  
-No create-workspace UI. Ensure singleton shared team metadata and seed channels `general` (type `general`) and `standup` (type `standup`, bot-owned) via Cloud Function / bootstrap.
+Support multiple workspaces in the data model, but the bootstrapping path creates exactly one default workspace named `Sebat` with a default channel `#general`. No create-workspace UI in MVP; the workspace can be switched later as a broader workspace feature.
 
 **Acceptance criteria**
-- Given a signed-in user, when the app loads team data, then `#general` and `#standup` exist without a workspace create screen.
-- Given a second authenticated user, when they open Chat, then they see the same `#general` and `#standup` channels.
-- Given bootstrap idempotency, when run twice, then only one `general` and one `standup` channel exist.
+- Given a signed-in user, when the app loads workspace data, then the default workspace named `Sebat` exists and `#general` is present without a workspace create screen.
+- Given the app is workspace-aware, when a user later accesses another workspace, then the same bootstrap flow does not create duplicate default workspaces.
+- Given bootstrap idempotency, when run twice, then only one workspace named `Sebat` and one `general` channel exist.
 
 **Out of scope**
-- Multi-workspace; invites; standup bot *execution* (T-015)
+- Workspace create UI; invites; roles; standup bot *execution* (T-015)
 
 ---
 

@@ -11,8 +11,8 @@ SebatPM is a mobile app that combines **Slack-like chat** and **Trello-like proj
 | Clients | Flutter (iOS + Android) |
 | Backend | Firebase (Auth, Firestore, Storage, FCM, Cloud Functions) |
 | App modes | **Chat** (cold-start default) and **Projects**; persistent mode switch |
-| Tenancy (MVP) | **Implicit shared team** — all authenticated users share one team; no create-workspace UI |
-| Channels | Users create custom channels; **`#general` and `#standup` auto-seeded** for the shared team |
+| Tenancy (MVP) | **Multi-workspace-ready** — the model supports multiple workspaces, but bootstrap creates exactly one default workspace named **`Sebat`** and no create-workspace UI |
+| Channels | Users create custom channels; the default workspace is seeded with **`#general`** and can later add `#standup` as a bot-owned channel |
 | Chat ↔ PM | Strong: open task from chat; board/status updates can post to a channel; optional project↔channel link |
 | Auth (MVP) | Email/password, Google Sign-In, Apple Sign-In (iOS) |
 | Standup | Bot owns **`#standup`** channel; targeting = only members with ≥1 `in_progress` task (bot runs later phase) |
@@ -22,13 +22,13 @@ SebatPM is a mobile app that combines **Slack-like chat** and **Trello-like proj
 ## 3. Personas
 
 - **Member** — Signs in, chats in channels, works on projects/tasks, switches modes.
-- **Admin** (later / v2 multi-workspace) — Invites, roles, standup schedule — **parked** while tenancy is a single shared team.
+- **Admin** (later / v2 multi-workspace) — Invites, roles, standup schedule — **parked** while the product is still bootstrapping a default workspace.
 
 ## 4. Domain model
 
 | Entity | MVP fields / rules |
 |--------|-------------------|
-| **Team** (implicit) | Single shared team for all authenticated users. No workspace create UI in MVP. |
+| **Workspace** | Default workspace is seeded automatically for first-time auth. The app is workspace-aware, but MVP does not ship a create-workspace UI. |
 | **Project** | Name, description, archived flag, optional `channelId`. Owns epics, tasks, tags. |
 | **Epic** | Title, description, projectId, optional color. Tasks may be epic-less. |
 | **Task** | Title, rich description, status, assignees[], tags[], epicId?, projectId, createdBy, timestamps. |
@@ -44,11 +44,11 @@ Parked entities (v2 / later): Workspace invites, multi-workspace, Reminder. Stan
 
 ## 5. Functional requirements
 
-### 5.1 Auth & shared team
+### 5.1 Auth & workspace bootstrap
 
 - Users sign up / sign in with email/password, Google, or Apple (iOS).
-- On first deploy / bootstrap, the shared team exists and **`#general` + `#standup`** are seeded (Cloud Function or admin seed — not a per-user create-workspace flow).
-- Authenticated users can use Chat and Projects against the shared team.
+- On first deploy / bootstrap, the default workspace named **`Sebat`** is created and **`#general`** is seeded (Cloud Function or admin seed — not a per-user create-workspace flow).
+- Authenticated users can use Chat and Projects within the default workspace, while the app remains ready for additional workspaces later.
 
 ### 5.2 App shell (dual mode)
 
@@ -68,8 +68,8 @@ Parked entities (v2 / later): Workspace invites, multi-workspace, Reminder. Stan
 
 ### 5.4 Communication
 
-- `#general` exists by default for the shared team.
-- `#standup` exists by default as the **standup bot’s channel** (bot-owned; members can read and reply during runs when the bot ships).
+- `#general` exists by default in the default workspace, which is named `Sebat`.
+- `#standup` may later be added as the **standup bot’s channel** (bot-owned; members can read and reply during runs when the bot ships).
 - Members can create custom channels.
 - Realtime markdown messages + attachments in channels.
 
@@ -113,11 +113,11 @@ Parked entities (v2 / later): Workspace invites, multi-workspace, Reminder. Stan
 ### Epic A — Foundations (Track S)
 
 - Given a new user, when they sign in, then they reach the dual-mode shell (Chat default).
-- Given bootstrap, when the team is initialized, then `#general` and `#standup` exist without a create-workspace UI.
+- Given bootstrap, when the default workspace named `Sebat` is initialized, then `#general` exists without a create-workspace UI.
 
 ### Epic B — Chat (Track C)
 
-- Given `#general` or a custom channel, when members send messages, then messages appear in realtime for the shared team.
+- Given `#general` or a custom channel, when members send messages, then messages appear in realtime within the active workspace.
 
 ### Epic C — PM core (Track P)
 
